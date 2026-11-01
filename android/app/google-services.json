@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "331819181657",
+    "project_id": "medoc-50fe7",
+    "storage_bucket": "medoc-50fe7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:331819181657:android:5f9619d657c36d466db348",
+        "android_client_info": {
+          "package_name": "com.android.medoc"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "331819181657-npl6gnhiovkomaedi9u66q5rbvp0ncsu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBmAOeQrN12PpQKI-_U6R4L9nXK6kTGAU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "331819181657-npl6gnhiovkomaedi9u66q5rbvp0ncsu.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "331819181657-npn5s326g22l4ltmkrqug80lq1je0f8b.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.medoc"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:331819181657:android:81bd169d884b72a06db348",
+        "android_client_info": {
+          "package_name": "com.example.medoc"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "331819181657-npl6gnhiovkomaedi9u66q5rbvp0ncsu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBmAOeQrN12PpQKI-_U6R4L9nXK6kTGAU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "331819181657-npl6gnhiovkomaedi9u66q5rbvp0ncsu.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "331819181657-npn5s326g22l4ltmkrqug80lq1je0f8b.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.medoc"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

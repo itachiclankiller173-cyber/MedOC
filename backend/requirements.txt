@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+python-multipart
+opencv-python-headless
+mediapipe
+numpy
+pillow
+google-genai
+pydantic
