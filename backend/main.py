@@ -245,23 +245,35 @@ from datetime import datetime, timezone
 from typing import Optional
 
 
+
 class VitalsRequest(BaseModel):
     device_id: str = "medoc_esp32"
 
+    # DHT11 room sensor
     temperature: Optional[float] = None
     humidity: Optional[float] = None
 
+    # ECG
     ecg_raw: Optional[int] = None
     ecg_leads_connected: Optional[bool] = None
 
+    # NTC temperature probe
     ntc_adc: Optional[int] = None
+    ntc_temperature_c: Optional[float] = None
+    ntc_temperature_f: Optional[float] = None
+    body_temp_warning_99f: Optional[bool] = None
+
+    # PIR motion sensor
     pir_motion: Optional[bool] = None
 
+    # MAX30102
     max30102_ir: Optional[int] = None
     max30102_red: Optional[int] = None
+    max30102_finger_present: Optional[bool] = None
 
-
-latest_vitals = {}
+    # Calculated health readings
+    heart_rate_bpm: Optional[int] = None
+    spo2_percent: Optional[int] = None
 
 
 @app.post("/api/vitals")

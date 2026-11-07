@@ -24,7 +24,9 @@ class _RiskAssessmentScreenState extends State<RiskAssessmentScreen> {
   String temperature = "--";
   String sleep = "--";
   String hydration = "--";
-
+int? liveHeartRate;
+int? liveSpo2; 
+double? liveNtcTempF;
   @override
   void initState() {
     super.initState();
@@ -191,7 +193,7 @@ class _RiskAssessmentScreenState extends State<RiskAssessmentScreen> {
 
               _ReadingCard(
                 title: "Heart Rate",
-                value: heartRate,
+                value: liveHeartRate?.toString() ?? '--',
                 unit: "BPM",
                 icon: Icons.favorite,
                 color: Colors.red,
@@ -199,7 +201,7 @@ class _RiskAssessmentScreenState extends State<RiskAssessmentScreen> {
 
               _ReadingCard(
                 title: "Oxygen Saturation",
-                value: oxygen,
+                value: liveSpo2?.toString() ?? '--',
                 unit: "%",
                 icon: Icons.air,
                 color: Colors.green,
@@ -215,8 +217,7 @@ class _RiskAssessmentScreenState extends State<RiskAssessmentScreen> {
 
               _ReadingCard(
                 title: "Temperature",
-                value: temperature,
-                unit: "°C",
+                value: liveNtcTempF?.toStringAsFixed(1) ?? '--',                unit: "°C",
                 icon: Icons.thermostat,
                 color: Colors.orange,
               ),

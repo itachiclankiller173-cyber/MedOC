@@ -17,7 +17,7 @@ class _InjuryAssessmentScreenState extends State<InjuryAssessmentScreen> {
 
   // Windows/Desktop
   // Change this when testing on Android.
-  final String baseUrl = "http://127.0.0.1:8000";
+  final String baseUrl = "https://medoc-8rme.onrender.com";
 
   File? selectedImage;
 

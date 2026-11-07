@@ -1,14 +1,12 @@
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AIService {
-  // Real Android phone
-final String baseUrl = "http://192.168.1.5:8000";
+  // MedOC cloud backend on Render
+  final String baseUrl = "https://medoc-8rme.onrender.com";
 
-  // ==========================================================
   // HEALTH SUMMARY
-  // ==========================================================
-
   Future<String> getHealthSummary({
     required String name,
     required String heartRate,
@@ -23,26 +21,19 @@ final String baseUrl = "http://192.168.1.5:8000";
         Uri.parse("$baseUrl/chat"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
-          "message":
-              """
+          "message": """
 Patient Name: $name
-
 Heart Rate: $heartRate
-
 Blood Pressure: $bloodPressure
-
 SpO₂: $oxygen
-
 Temperature: $temperature
-
 Sleep: $sleep hours
-
 Water Intake: $water litres
 
 Give a short healthcare summary and health suggestions.
 """,
         }),
-      );
+      ).timeout(const Duration(seconds: 60));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -55,26 +46,20 @@ Give a short healthcare summary and health suggestions.
     }
   }
 
-  // ==========================================================
   // MEDICAL REPORT ANALYZER
-  // ==========================================================
-
   Future<String> analyzeMedicalReport(String reportText) async {
     try {
       final response = await http.post(
         Uri.parse("$baseUrl/chat"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
-          "message":
-              """
+          "message": """
 You are MedOC AI.
 
 Analyze this medical report.
-
 Explain in simple language.
 
 Include:
-
 1. Important findings
 2. Abnormal values
 3. Possible meaning
@@ -82,11 +67,10 @@ Include:
 5. Whether the patient should consult a doctor
 
 Medical Report:
-
 $reportText
 """,
         }),
-      );
+      ).timeout(const Duration(seconds: 60));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -99,17 +83,14 @@ $reportText
     }
   }
 
-  // ==========================================================
   // DISEASE PREDICTION
-  // ==========================================================
-
   Future<Map<String, dynamic>> predictDisease(String symptoms) async {
     try {
       final response = await http.post(
         Uri.parse("$baseUrl/predict-disease"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"symptoms": symptoms}),
-      );
+      ).timeout(const Duration(seconds: 60));
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -121,9 +102,7 @@ $reportText
     }
   }
 
-  // ==========================================================
-  // AI GAIT ANALYSIS
-  // ==========================================================
+  // INJURY IMAGE ANALYSIS
   Future<String> analyzeInjuryImage(String imagePath) async {
     try {
       final request = http.MultipartRequest(
@@ -131,30 +110,36 @@ $reportText
         Uri.parse("$baseUrl/analyze-injury"),
       );
 
-      request.files.add(await http.MultipartFile.fromPath("image", imagePath));
+      request.files.add(
+        await http.MultipartFile.fromPath("image", imagePath),
+      );
 
-      final response = await request.send();
+      final streamedResponse = await request.send().timeout(
+        const Duration(seconds: 60),
+      );
 
-      final responseBody = await response.stream.bytesToString();
+      final responseBody =
+          await streamedResponse.stream.bytesToString();
 
-      if (response.statusCode == 200) {
+      if (streamedResponse.statusCode == 200) {
         final data = jsonDecode(responseBody);
 
         if (data["success"] == true) {
           final assessment = data["assessment"];
-
-          return assessment?["description"] ?? "Image received successfully.";
+          return assessment?["description"] ??
+              "Image received successfully.";
         }
 
         return data["error"] ?? "Unable to analyze image.";
       }
 
-      return "AI Server Error (${response.statusCode})";
+      return "AI Server Error (${streamedResponse.statusCode})";
     } catch (e) {
       return "Connection Error:\n$e";
     }
   }
 
+  // GAIT ANALYSIS
   Future<String> analyzeGait({
     required int score,
     required String balance,
@@ -193,11 +178,10 @@ $reportText
           "numbness": numbness,
           "notes": notes,
         }),
-      );
+      ).timeout(const Duration(seconds: 60));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-
         return data["reply"] ?? "No gait analysis response";
       }
 

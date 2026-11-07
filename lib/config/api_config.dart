@@ -4,7 +4,7 @@ class ApiConfig {
   static String get baseUrl {
     // Chrome
     if (kIsWeb) {
-      return "http://127.0.0.1:8000";
+      return "https://medoc-8rme.onrender.com";
     }
 
     // Real Android phone

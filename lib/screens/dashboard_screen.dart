@@ -55,6 +55,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   double? roomTemperature;
   double? roomHumidity;
+  int? ecgRaw;
+bool? ecgLeadsConnected;
+
+int? ntcAdc;
+int? liveHeartRate;
+int? liveSpo2;
+double? liveNtcTempF;
+bool? pirMotion;
+
+int? max30102Ir;
+int? max30102Red;
+
+String? receivedAt;
 
   String name = 'User';
   String aiSummary = 'AI analysis will appear here.';
@@ -91,30 +104,51 @@ void dispose() {
 }
 
   Future<void> loadRoomSensorData() async {
-    if (mounted) {
-      setState(() => sensorLoading = true);
-    }
+  if (sensorLoading) return;
 
-    try {
-      final data = await esp32.Esp32Service.getSensorData();
-
-      if (!mounted) return;
-
-      setState(() {
-        roomTemperature =
-            (data['temperature'] as num?)?.toDouble();
-        roomHumidity =
-            (data['humidity'] as num?)?.toDouble();
-        sensorLoading = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-
-      setState(() => sensorLoading = false);
-      debugPrint('ESP32 sensor error: $e');
-    }
+  if (mounted) {
+    setState(() => sensorLoading = true);
   }
 
+  try {
+    final data = await esp32.Esp32Service.getSensorData();
+
+    if (!mounted) return;
+
+    final hr = data['heart_rate_bpm'] ?? data['heart_rate'];
+    final spo2Value =
+        data['spo2_percent'] ?? data['spo2'];
+    final ntcTemp =
+        data['ntc_temperature_f'] ?? data['ntc_temp_f'];
+
+    setState(() {
+      roomTemperature =
+          (data['temperature'] as num?)?.toDouble();
+
+      roomHumidity =
+          (data['humidity'] as num?)?.toDouble();
+
+      liveHeartRate = hr is num
+          ? hr.round()
+          : int.tryParse('$hr');
+
+      liveSpo2 = spo2Value is num
+          ? spo2Value.round()
+          : int.tryParse('$spo2Value');
+
+      liveNtcTempF = ntcTemp is num
+          ? ntcTemp.toDouble()
+          : double.tryParse('$ntcTemp');
+
+      sensorLoading = false;
+    });
+  } catch (e) {
+    if (!mounted) return;
+
+    setState(() => sensorLoading = false);
+    debugPrint('ESP32 sensor error: $e');
+  }
+}
   Future<void> loadDashboard() async {
     try {
       final patient = await PatientService().getSelectedPatient();
@@ -413,8 +447,7 @@ void dispose() {
                     onTap: () => openPage(
                       VitalDetailScreen(
                         title: 'Temperature',
-                        value: temperature,
-                        unit: '°C',
+                        value: liveNtcTempF?.toStringAsFixed(1) ?? '--',                        unit: '°F',
                         icon: Icons.thermostat,
                         color: Colors.orange,
                         description:
@@ -430,7 +463,7 @@ void dispose() {
                     onTap: () => openPage(
                       VitalDetailScreen(
                         title: 'Blood Oxygen (SpO₂)',
-                        value: oxygen,
+                        value: liveSpo2?.toString() ?? '--',
                         unit: '%',
                         icon: Icons.air,
                         color: Colors.green,
@@ -586,7 +619,7 @@ void dispose() {
                 children: [
                   _VitalCard(
                     title: 'Heart Rate',
-                    value: heartRate,
+                    value: liveHeartRate?.toString() ?? '--',
                     unit: 'BPM',
                     icon: Icons.favorite,
                     color: Colors.red,
@@ -600,15 +633,14 @@ void dispose() {
                   ),
                   _VitalCard(
                     title: 'SpO₂',
-                    value: oxygen,
+                    value: liveSpo2?.toString() ?? '--',
                     unit: '%',
                     icon: Icons.air,
                     color: Colors.green,
                   ),
                   _VitalCard(
                     title: 'Temperature',
-                    value: temperature,
-                    unit: '°C',
+                    value: liveNtcTempF?.toStringAsFixed(1) ?? '--',                    unit: '°F',
                     icon: Icons.thermostat,
                     color: Colors.orange,
                   ),
@@ -631,7 +663,7 @@ Row(
         child: _VitalCard(
           title: 'Room Temp.',
           value: roomTemperature?.toStringAsFixed(1) ?? '--',
-          unit: '°C',
+          unit: '°F',
           icon: Icons.device_thermostat,
           color: Colors.deepOrange,
         ),
