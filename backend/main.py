@@ -7,6 +7,28 @@ from ai_engine import analyze_burn_image
 from ai_engine import generate_health_response
 from pydantic import BaseModel
 from models.gait_model import analyze_gait as run_gait_analysis
+
+# ==========================================================
+# MEDOC ECG LIVE DATA
+# ==========================================================
+
+latest_vitals = {}
+
+latest_ecg = {
+    "device_id": "medoc_esp32",
+    "sampling_rate": 250,
+    "leads_connected": False,
+    "samples": [],
+    "received_at": None,
+}
+
+
+class ECGSamplesRequest(BaseModel):
+    device_id: str = "medoc_esp32"
+    sampling_rate: int = 250
+    leads_connected: bool = False
+    samples: list[int]
+
 app = FastAPI(
     title="MEDOC AI Backend",
     description="AI backend for Gait Analysis, FootCheck and Burn Assessment",
@@ -245,6 +267,89 @@ from datetime import datetime, timezone
 from typing import Optional
 
 
+# ==========================================================
+# MEDOC ECG LIVE WAVEFORM STORAGE
+# ==========================================================
+
+# Latest sensor readings
+latest_vitals = {}
+
+# Latest ECG sample batch
+latest_ecg = {}
+
+
+class EcgSamplesRequest(BaseModel):
+    device_id: str = "medoc_esp32"
+    sampling_rate: int = 250
+    leads_connected: bool = False
+    samples: list[int]
+
+
+@app.post("/api/ecg/samples")
+async def receive_ecg_samples(request: EcgSamplesRequest):
+    """
+    Receive a batch of real ECG ADC samples from ESP32.
+    """
+
+    global latest_ecg
+
+    if request.sampling_rate < 1 or request.sampling_rate > 1000:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid ECG sampling rate."
+        )
+
+    if not request.samples or len(request.samples) > 500:
+        raise HTTPException(
+            status_code=400,
+            detail="Send between 1 and 500 ECG samples."
+        )
+
+    if any(sample < 0 or sample > 4095 for sample in request.samples):
+        raise HTTPException(
+            status_code=400,
+            detail="ECG samples must be between 0 and 4095."
+        )
+
+    latest_ecg = {
+        "device_id": request.device_id,
+        "sampling_rate": request.sampling_rate,
+        "leads_connected": request.leads_connected,
+        "samples": request.samples,
+        "received_at": datetime.now(timezone.utc).isoformat()
+    }
+
+    print(
+        f"[MEDOC ECG] Received {len(request.samples)} samples. "
+        f"Leads connected: {request.leads_connected}"
+    )
+
+    return {
+        "success": True,
+        "message": "ECG samples received",
+        "sample_count": len(request.samples),
+        "received_at": latest_ecg["received_at"]
+    }
+
+
+@app.get("/api/ecg/samples")
+async def get_ecg_samples():
+    """
+    Return the latest ECG sample batch to Flutter.
+    """
+
+    if not latest_ecg:
+        return {
+            "success": True,
+            "message": "No ECG samples received yet",
+            "data": None
+        }
+
+    return {
+        "success": True,
+        "data": latest_ecg
+    }
+
 
 class VitalsRequest(BaseModel):
     device_id: str = "medoc_esp32"
@@ -318,4 +423,35 @@ async def get_latest_vitals():
     return {
         "success": True,
         "data": latest_vitals,
+    }
+@app.post("/api/ecg/samples")
+async def receive_ecg_samples(request: ECGSamplesRequest):
+    global latest_ecg
+
+    if len(request.samples) > 500:
+        raise HTTPException(
+            status_code=400,
+            detail="Maximum 500 ECG samples allowed per batch."
+        )
+
+    latest_ecg = {
+        "device_id": request.device_id,
+        "sampling_rate": request.sampling_rate,
+        "leads_connected": request.leads_connected,
+        "samples": request.samples,
+        "received_at": datetime.now(timezone.utc).isoformat()
+    }
+
+    return {
+        "success": True,
+        "message": "ECG samples received",
+        "sample_count": len(request.samples)
+    }
+
+
+@app.get("/api/ecg/samples")
+async def get_ecg_samples():
+    return {
+        "success": True,
+        "data": latest_ecg
     }
